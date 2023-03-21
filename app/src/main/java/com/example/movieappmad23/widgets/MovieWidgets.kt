@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -39,7 +40,8 @@ import com.example.movieappmad23.ui.theme.Shapes
 fun MovieRow(
     movie: Movie = getMovies()[0],
     modifier: Modifier = Modifier,
-    onItemClick: (String) -> Unit = {}
+    onItemClick: (String) -> Unit = {},
+    onFavClick: (Movie) -> Unit = {}
 ) {
     Card(modifier = modifier
         .clickable {
@@ -57,7 +59,7 @@ fun MovieRow(
                 contentAlignment = Alignment.Center
             ) {
                 MovieImage(imageUrl = movie.images[0])
-                FavoriteIcon()
+                FavoriteIcon(movie, onFavClick)
             }
 
             MovieDetails(modifier = Modifier.padding(12.dp), movie = movie)
@@ -83,7 +85,7 @@ fun MovieImage(imageUrl: String) {
 }
 
 @Composable
-fun FavoriteIcon() {
+fun FavoriteIcon(movie: Movie, onFavClick: (Movie) -> Unit) {
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(10.dp),
@@ -91,8 +93,17 @@ fun FavoriteIcon() {
     ){
         Icon(
             tint = MaterialTheme.colors.secondary,
-            imageVector = Icons.Default.FavoriteBorder,
-            contentDescription = "Add to favorites")
+            imageVector =
+            if(movie.isFavorite) {
+                Icons.Default.Favorite
+            } else {
+                Icons.Default.FavoriteBorder
+            },
+            contentDescription = "Add to favorites",
+            modifier = Modifier.clickable {
+                onFavClick(movie)
+            }
+        )
     }
 }
 
