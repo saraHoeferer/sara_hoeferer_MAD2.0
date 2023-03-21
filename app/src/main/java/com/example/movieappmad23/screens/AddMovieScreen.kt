@@ -5,8 +5,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -14,8 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -26,7 +22,6 @@ import com.example.movieappmad23.widgets.SimpleTopAppBar
 
 @Composable
 fun AddMovieScreen(navController: NavController){
-    // needed for show/hide snackbar
     val scaffoldState = rememberScaffoldState()
 
     Scaffold(
@@ -52,37 +47,19 @@ fun MainContent(modifier: Modifier = Modifier) {
     ) {
 
         Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.Start
         ) {
 
-            OutlinedTextField(
-                value = "",
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                onValueChange = { },
-                label = { Text(text = stringResource(R.string.enter_movie_title)) },
-                isError = false,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = { }
-                ),
-            )
+            var title by remember {
+                mutableStateOf("")
+            }
 
-            OutlinedTextField(
-                value = "",
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                onValueChange = { },
-                label = { Text(stringResource(R.string.enter_movie_year)) },
-                isError = false,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                keyboardActions = KeyboardActions(
-                    onDone = { }
-                ),
-            )
+            var year by remember {
+                mutableStateOf("")
+            }
 
             val genres = Genre.values().toList()
 
@@ -97,16 +74,56 @@ fun MainContent(modifier: Modifier = Modifier) {
                 )
             }
 
+            var director by remember {
+                mutableStateOf("")
+            }
+
+            var actors by remember {
+                mutableStateOf("")
+            }
+
+            var plot by remember {
+                mutableStateOf("")
+            }
+
+            var rating by remember {
+                mutableStateOf("")
+            }
+
+            var isEnabledSaveButton by remember {
+                mutableStateOf(true)
+            }
+
+            OutlinedTextField(
+                value = title,
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { title = it },
+                label = { Text(text = stringResource(R.string.enter_movie_title)) },
+                isError = false
+            )
+
+            OutlinedTextField(
+                value = year,
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { year = it },
+                label = { Text(stringResource(R.string.enter_movie_year)) },
+                isError = false
+            )
+
             Text(
-                text = "Genres",
+                modifier = Modifier.padding(top = 4.dp),
+                text = stringResource(R.string.select_genres),
                 textAlign = TextAlign.Start,
                 style = MaterialTheme.typography.h6)
 
             LazyHorizontalGrid(
                 modifier = Modifier.height(100.dp),
-                rows = GridCells.Fixed(2)){
+                rows = GridCells.Fixed(3)){
                 items(genreItems) { genreItem ->
                     Chip(
+                        modifier = Modifier.padding(2.dp),
                         colors = ChipDefaults.chipColors(
                             backgroundColor = if (genreItem.isSelected)
                                 colorResource(id = R.color.purple_200)
@@ -129,66 +146,52 @@ fun MainContent(modifier: Modifier = Modifier) {
             }
 
             OutlinedTextField(
-                value = "",
+                value = director,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { },
+                onValueChange = { director = it },
                 label = { Text(stringResource(R.string.enter_director)) },
-                isError = false,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = { }
-                ),
+                isError = false
             )
 
             OutlinedTextField(
-                value = "",
+                value = actors,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { },
+                onValueChange = { actors = it },
                 label = { Text(stringResource(R.string.enter_actors)) },
-                isError = false,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = { }
-                ),
+                isError = false
             )
 
             OutlinedTextField(
-                value = "",
+                value = plot,
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
-                onValueChange = { },
+                onValueChange = { plot = it },
                 label = { Text(textAlign = TextAlign.Start, text = stringResource(R.string.enter_plot)) },
-                isError = false,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = { }
-                ),
+                isError = false
             )
 
             OutlinedTextField(
-                value = "",
+                value = rating,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { },
+                onValueChange = {
+                                rating = if(it.startsWith("0")) {
+                                    ""
+                                } else {
+                                    it
+                                }
+                },
                 label = { Text(stringResource(R.string.enter_rating)) },
-                isError = false,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                keyboardActions = KeyboardActions(
-                    onDone = { }
-                ),
+                isError = false
             )
 
-            Button(onClick = { /*TODO*/ }) {
-                Text(text = "Save")
+            Button(
+                enabled = isEnabledSaveButton,
+                onClick = { /*TODO add a new movie to the movie list*/ }) {
+                Text(text = stringResource(R.string.add))
             }
         }
     }

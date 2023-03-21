@@ -16,7 +16,7 @@ fun Navigation() {
 
     val movieViewModel: MoviesViewModel = viewModel()
 
-    NavHost(navController = navController, startDestination = Screen.MainScreen.route) {
+    NavHost(navController = navController, startDestination = Screen.AddMovieScreen.route) {
         composable(route = Screen.MainScreen.route){
             HomeScreen(navController = navController, moviesViewModel = movieViewModel)
         }
