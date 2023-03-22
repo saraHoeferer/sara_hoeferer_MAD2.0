@@ -11,8 +11,8 @@ class Movie(
     val genre: List<Genre>,
     val director: String,
     val actors: String,
-    val plot: String,
-    val images: List<String>,
+    val plot: String = "No plot available",
+    val images: List<String> = listOf(),
     val rating: Float = 0f,
     initialIsFavorite: Boolean = false
 ) {

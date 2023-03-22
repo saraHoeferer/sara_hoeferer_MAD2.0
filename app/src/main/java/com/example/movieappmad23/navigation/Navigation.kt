@@ -14,9 +14,10 @@ import com.example.movieappmad23.viewmodels.MoviesViewModel
 fun Navigation() {
     val navController = rememberNavController()
 
+    // inside a composable
     val movieViewModel: MoviesViewModel = viewModel()
 
-    NavHost(navController = navController, startDestination = Screen.AddMovieScreen.route) {
+    NavHost(navController = navController, startDestination = Screen.MainScreen.route) {
         composable(route = Screen.MainScreen.route){
             HomeScreen(navController = navController, moviesViewModel = movieViewModel)
         }
@@ -26,7 +27,7 @@ fun Navigation() {
         }
         
         composable(Screen.AddMovieScreen.route) {
-            AddMovieScreen(navController = navController)
+            AddMovieScreen(navController = navController, moviesViewModel = movieViewModel)
         }
 
         // build a route like: root/detail-screen/id=34

@@ -18,10 +18,14 @@ import androidx.navigation.NavController
 import com.example.movieappmad23.R
 import com.example.movieappmad23.models.Genre
 import com.example.movieappmad23.models.ListItemSelectable
+import com.example.movieappmad23.viewmodels.MoviesViewModel
 import com.example.movieappmad23.widgets.SimpleTopAppBar
 
 @Composable
-fun AddMovieScreen(navController: NavController){
+fun AddMovieScreen(
+    navController: NavController,
+    moviesViewModel: MoviesViewModel
+){
     val scaffoldState = rememberScaffoldState()
 
     Scaffold(
@@ -32,13 +36,19 @@ fun AddMovieScreen(navController: NavController){
             }
         },
     ) { padding ->
-        MainContent(Modifier.padding(padding))
+        MainContent(
+            Modifier.padding(padding),
+            moviesViewModel = moviesViewModel
+        )
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun MainContent(modifier: Modifier = Modifier) {
+fun MainContent(
+    modifier: Modifier = Modifier,
+    moviesViewModel: MoviesViewModel
+) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -53,14 +63,6 @@ fun MainContent(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.Start
         ) {
 
-            var title by remember {
-                mutableStateOf("")
-            }
-
-            var year by remember {
-                mutableStateOf("")
-            }
-
             val genres = Genre.values().toList()
 
             var genreItems by remember {
@@ -74,42 +76,28 @@ fun MainContent(modifier: Modifier = Modifier) {
                 )
             }
 
-            var director by remember {
-                mutableStateOf("")
-            }
-
-            var actors by remember {
-                mutableStateOf("")
-            }
-
-            var plot by remember {
-                mutableStateOf("")
-            }
-
-            var rating by remember {
-                mutableStateOf("")
-            }
-
-            var isEnabledSaveButton by remember {
-                mutableStateOf(true)
-            }
-
             OutlinedTextField(
-                value = title,
+                value = moviesViewModel.title.value,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { title = it },
+                onValueChange = {
+                    moviesViewModel.title.value = it
+                    moviesViewModel.validateTitle()
+                },
                 label = { Text(text = stringResource(R.string.enter_movie_title)) },
-                isError = false
+                isError = !moviesViewModel.isTitleValid.value
             )
 
             OutlinedTextField(
-                value = year,
+                value = moviesViewModel.year.value,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { year = it },
+                onValueChange = {
+                    moviesViewModel.year.value = it
+                    moviesViewModel.validateYear()
+                },
                 label = { Text(stringResource(R.string.enter_movie_year)) },
-                isError = false
+                isError = !moviesViewModel.isYearValid.value
             )
 
             Text(
@@ -121,7 +109,7 @@ fun MainContent(modifier: Modifier = Modifier) {
             LazyHorizontalGrid(
                 modifier = Modifier.height(100.dp),
                 rows = GridCells.Fixed(3)){
-                items(genreItems) { genreItem ->
+                items(moviesViewModel.selectableGenreItems) { genreItem ->
                     Chip(
                         modifier = Modifier.padding(2.dp),
                         colors = ChipDefaults.chipColors(
@@ -131,13 +119,7 @@ fun MainContent(modifier: Modifier = Modifier) {
                                 colorResource(id = R.color.white)
                         ),
                         onClick = {
-                            genreItems = genreItems.map {
-                                if (it.title == genreItem.title) {
-                                    genreItem.copy(isSelected = !genreItem.isSelected)
-                                } else {
-                                    it
-                                }
-                            }
+                            moviesViewModel.selectGenre(genreItem)
                         }
                     ) {
                         Text(text = genreItem.title)
@@ -146,51 +128,53 @@ fun MainContent(modifier: Modifier = Modifier) {
             }
 
             OutlinedTextField(
-                value = director,
+                value = moviesViewModel.director.value,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { director = it },
+                onValueChange = {
+                    moviesViewModel.director.value = it
+                    moviesViewModel.validateDirector()
+                },
                 label = { Text(stringResource(R.string.enter_director)) },
-                isError = false
+                isError = !moviesViewModel.isDirectorValid.value
             )
 
             OutlinedTextField(
-                value = actors,
+                value = moviesViewModel.actors.value,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { actors = it },
+                onValueChange = {
+                    moviesViewModel.actors.value = it
+                    moviesViewModel.validateActors()
+                },
                 label = { Text(stringResource(R.string.enter_actors)) },
-                isError = false
+                isError = !moviesViewModel.isActorsValid.value
             )
 
             OutlinedTextField(
-                value = plot,
+                value = moviesViewModel.plot.value,
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
-                onValueChange = { plot = it },
-                label = { Text(textAlign = TextAlign.Start, text = stringResource(R.string.enter_plot)) },
-                isError = false
+                onValueChange = { moviesViewModel.plot.value = it },
+                label = { Text(textAlign = TextAlign.Start, text = stringResource(R.string.enter_plot)) }
             )
 
             OutlinedTextField(
-                value = rating,
+                value = moviesViewModel.rating.value,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 onValueChange = {
-                                rating = if(it.startsWith("0")) {
-                                    ""
-                                } else {
-                                    it
-                                }
+                    moviesViewModel.rating.value = it
+                    moviesViewModel.validateRating()
                 },
                 label = { Text(stringResource(R.string.enter_rating)) },
-                isError = false
+                isError = !moviesViewModel.isRatingValid.value
             )
 
             Button(
-                enabled = isEnabledSaveButton,
-                onClick = { /*TODO add a new movie to the movie list*/ }) {
+                enabled = moviesViewModel.isEnabledSaveButton.value,
+                onClick = { moviesViewModel.addMovie() }) {
                 Text(text = stringResource(R.string.add))
             }
         }

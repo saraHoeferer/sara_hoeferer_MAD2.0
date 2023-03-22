@@ -40,12 +40,12 @@ import com.example.movieappmad23.ui.theme.Shapes
 fun MovieRow(
     movie: Movie = getMovies()[0],
     modifier: Modifier = Modifier,
-    onItemClick: (String) -> Unit = {},
+    onMovieRowClick: (String) -> Unit = {},
     onFavClick: (Movie) -> Unit = {}
 ) {
     Card(modifier = modifier
         .clickable {
-            onItemClick(movie.id)
+            onMovieRowClick(movie.id)
         }
         .fillMaxWidth()
         .padding(5.dp),

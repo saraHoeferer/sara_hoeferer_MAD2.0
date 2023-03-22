@@ -25,7 +25,7 @@ fun FavoriteScreen(navController: NavController, moviesViewModel: MoviesViewMode
                 items(moviesViewModel.favoriteMovies){ movie ->
                     MovieRow(
                         movie = movie,
-                        onItemClick = { movieId ->
+                        onMovieRowClick = { movieId ->
                             navController.navigate(route = Screen.DetailScreen.withId(movieId))
                         },
                         onFavClick = { movieId ->

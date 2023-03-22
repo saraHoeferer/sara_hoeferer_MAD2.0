@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.movieappmad23.models.getMovies
 import com.example.movieappmad23.viewmodels.MoviesViewModel
 import com.example.movieappmad23.widgets.HomeTopAppBar
 import com.example.movieappmad23.widgets.MovieRow
@@ -62,12 +61,10 @@ fun MainContent(
     navController: NavController,
     viewModel: MoviesViewModel
 ) {
-    val movies = getMovies()
     MovieList(
         modifier = modifier,
         navController = navController,
         viewModel = viewModel
-        //movies = movies
     )
 }
 
@@ -76,7 +73,6 @@ fun MovieList(
     modifier: Modifier = Modifier,
     navController: NavController,
     viewModel: MoviesViewModel
-    //movies: List<Movie> = getMovies()
 ) {
     LazyColumn (
         modifier = modifier,
@@ -84,11 +80,10 @@ fun MovieList(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
 
-
         items(viewModel.movieList) { movie ->
             MovieRow(
                 movie = movie,
-                onItemClick = { movieId ->
+                onMovieRowClick = { movieId ->
                     navController.navigate(Screen.DetailScreen.withId(movieId))
                 },
                 onFavClick  = { movieId ->
