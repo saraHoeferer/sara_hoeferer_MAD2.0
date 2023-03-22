@@ -72,7 +72,10 @@ fun TopAppBar() {
         // Add a Column
         Column {
             // Add Text
-            Text(text = "Movies", color = Color.White)
+            Text(text = "Movies",
+                color = Color.White,
+                fontSize = 20.sp
+            )
         }
         // Add another Column
         Column(
