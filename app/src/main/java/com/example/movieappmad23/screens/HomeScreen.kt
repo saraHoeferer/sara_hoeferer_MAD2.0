@@ -11,6 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -74,20 +76,22 @@ fun MovieList(
     navController: NavController,
     viewModel: MoviesViewModel
 ) {
+    val movieListState by viewModel.movieListState.collectAsState()
+
     LazyColumn (
         modifier = modifier,
         contentPadding = PaddingValues(all = 12.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
 
-        items(viewModel.movieList) { movie ->
+        items(items = movieListState) { movieItem ->
             MovieRow(
-                movie = movie,
+                movie = movieItem,
                 onMovieRowClick = { movieId ->
                     navController.navigate(Screen.DetailScreen.withId(movieId))
                 },
-                onFavClick  = { movieId ->
-                    viewModel.toggleFavorite(movieId)
+                onFavClick  = { movie ->
+                    viewModel.updateMovies(movie)
                 }
             )
         }

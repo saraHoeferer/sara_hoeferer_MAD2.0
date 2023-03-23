@@ -8,49 +8,41 @@ import com.example.movieappmad23.models.Genre
 import com.example.movieappmad23.models.ListItemSelectable
 import com.example.movieappmad23.models.Movie
 import com.example.movieappmad23.models.getMovies
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.util.*
 
 // inherit from ViewModel class
 class MoviesViewModel: ViewModel() {
-    private val _movieList = getMovies().toMutableStateList()   //get all movies and create an observable state list
-    val movieList: List<Movie>  // expose previously created list but immutable
-        get() = _movieList
+    private val _movieListState = MutableStateFlow(listOf<Movie>())
+    val movieListState: StateFlow<List<Movie>> = _movieListState.asStateFlow()
+
+    private val _addMovieValidationState = MutableStateFlow(AddMovieValidationState())
+    val addMovieValidationState: StateFlow<AddMovieValidationState> = _addMovieValidationState
 
     val favoriteMovies: List<Movie>
-        get() = _movieList.filter { it.isFavorite == true }
+        get() = _movieListState.value.filter { it.isFavorite == true }
 
     // validation fields
     var isEnabledSaveButton: MutableState<Boolean> = mutableStateOf(false)
 
     var title = mutableStateOf("")
-    var isTitleValid: MutableState<Boolean> = mutableStateOf(false)
-    var titleErrMsg: MutableState<String> = mutableStateOf("")
-
     var year = mutableStateOf("")
-    var isYearValid: MutableState<Boolean> = mutableStateOf(false)
-    var yearErrMsg: MutableState<String> = mutableStateOf("")
-
     var director = mutableStateOf("")
-    var isDirectorValid: MutableState<Boolean> = mutableStateOf(false)
-    var directorErrMsg: MutableState<String> = mutableStateOf("")
-
     var actors = mutableStateOf("")
-    var isActorsValid: MutableState<Boolean> = mutableStateOf(false)
-    var actorsErrMsg: MutableState<String> = mutableStateOf("")
-
     var plot = mutableStateOf("")
-
-    var genreErrMsg: MutableState<String> = mutableStateOf("")
     var selectableGenreItems = Genre.values().toList().map {genre ->
         ListItemSelectable(title = genre.toString())
     }.toMutableStateList()
-
     var rating = mutableStateOf("")
-    var isRatingValid: MutableState<Boolean> = mutableStateOf(false)
-    var ratingErrMsg: MutableState<String> = mutableStateOf("")
 
-    // find provided movie by id and toggle its isFavorite attribute
-    fun toggleFavorite(movie: Movie) = movieList.find { it.id == movie.id }?.let { movie ->
+    init {
+        _movieListState.value = getMovies()
+    }
+
+    fun updateMovies(movie: Movie) = _movieListState.value.find { it.id == movie.id }?.let { movie ->
         movie.isFavorite = !movie.isFavorite
     }
 
@@ -59,54 +51,88 @@ class MoviesViewModel: ViewModel() {
     }
 
     private fun shouldEnableAddButton() {
-        isEnabledSaveButton.value = titleErrMsg.value.isEmpty()
-                && yearErrMsg.value.isEmpty()
-                && directorErrMsg.value.isEmpty()
-                && actorsErrMsg.value.isEmpty()
-                && ratingErrMsg.value.isEmpty()
-                && genreErrMsg.value.isEmpty()
+        isEnabledSaveButton.value =
+                addMovieValidationState.value.titleErrMsg.isEmpty()
+                && addMovieValidationState.value.yearErrMsg.isEmpty()
+                && addMovieValidationState.value.directorErrMsg.isEmpty()
+                && addMovieValidationState.value.actorsErrMsg.isEmpty()
+                && addMovieValidationState.value.ratingErrMsg.isEmpty()
+                && addMovieValidationState.value.genreErrMsg.isEmpty()
     }
 
     fun validateTitle() {
-        if (title.value.trim().isNotEmpty()) {
-            isTitleValid.value = true
-            titleErrMsg.value = ""
+        if(title.value.trim().isNotEmpty()){
+            _addMovieValidationState.update { currentState ->
+                currentState.copy(
+                    isTitleValid = true,
+                    titleErrMsg = ""
+                )
+            }
+            shouldEnableAddButton()
         } else {
-            isTitleValid.value = false
-            titleErrMsg.value = "Title is required"
+            _addMovieValidationState.update { currentState ->
+                currentState.copy(
+                    isTitleValid = false,
+                    titleErrMsg = "Title is required"
+                )
+            }
         }
-        shouldEnableAddButton()
     }
 
     fun validateYear() {
         if (year.value.trim().isNotEmpty()) {
-            isYearValid.value = true
-            yearErrMsg.value = ""
+            _addMovieValidationState.update { currentState ->
+                currentState.copy(
+                    isYearValid = true,
+                    yearErrMsg = ""
+                )
+            }
+            shouldEnableAddButton()
         } else {
-            isYearValid.value = false
-            yearErrMsg.value = "Year is required"
+            _addMovieValidationState.update { currentState ->
+                currentState.copy(
+                    isYearValid = false,
+                    yearErrMsg = "Year is required"
+                )
+            }
         }
-        shouldEnableAddButton()
     }
 
     fun validateDirector() {
         if (director.value.trim().isNotEmpty()) {
-            isDirectorValid.value = true
-            directorErrMsg.value = ""
+            _addMovieValidationState.update { currentState ->
+                currentState.copy(
+                    isDirectorValid = true,
+                    directorErrMsg = ""
+                )
+            }
+            shouldEnableAddButton()
         } else {
-            isDirectorValid.value = false
-            directorErrMsg.value = "Director is required"
+            _addMovieValidationState.update { currentState ->
+                currentState.copy(
+                    isDirectorValid = false,
+                    directorErrMsg = "Director is required"
+                )
+            }
         }
-        shouldEnableAddButton()
     }
 
     fun validateActors() {
         if (actors.value.trim().isNotEmpty()) {
-            isActorsValid.value = true
-            actorsErrMsg.value = ""
+            _addMovieValidationState.update { currentState ->
+                currentState.copy(
+                    isActorsValid = true,
+                    actorsErrMsg = ""
+                )
+            }
+            shouldEnableAddButton()
         } else {
-            isActorsValid.value = false
-            actorsErrMsg.value = "Actors is required"
+            _addMovieValidationState.update { currentState ->
+                currentState.copy(
+                    isActorsValid = false,
+                    actorsErrMsg = "Actors is required"
+                )
+            }
         }
         shouldEnableAddButton()
     }
@@ -119,11 +145,20 @@ class MoviesViewModel: ViewModel() {
             && (ratingVal >= 0)
             && (ratingVal <= 10)
         ){
-            isRatingValid.value = true
-            ratingErrMsg.value = ""
+            _addMovieValidationState.update { currentState ->
+                currentState.copy(
+                    isRatingValid = true,
+                    ratingErrMsg = ""
+                )
+            }
+            shouldEnableAddButton()
         } else {
-            isRatingValid.value = false
-            ratingErrMsg.value = "Rating is required and must be valid decimal format."
+            _addMovieValidationState.update { currentState ->
+                currentState.copy(
+                    isRatingValid = false,
+                    ratingErrMsg = "Rating is required and must be valid decimal format."
+                )
+            }
         }
 
         shouldEnableAddButton()
@@ -131,9 +166,17 @@ class MoviesViewModel: ViewModel() {
 
     fun validateGenres(){
         if(selectableGenreItems.filter { item -> item.isSelected }.isEmpty()) {
-            genreErrMsg.value = "Genre is required."
+            _addMovieValidationState.update { currentState ->
+                currentState.copy(
+                    genreErrMsg = "Genre is required"
+                )
+            }
         } else {
-            genreErrMsg.value = ""
+            _addMovieValidationState.update { currentState ->
+                currentState.copy(
+                    genreErrMsg = ""
+                )
+            }
         }
     }
 
@@ -155,6 +198,10 @@ class MoviesViewModel: ViewModel() {
             rating = rating.value.toFloat()
         )
 
-        _movieList.add(movie)
+        _movieListState.update {
+            val list: MutableList<Movie> = _movieListState.value.toMutableList()
+            list.add(movie)
+            list
+        }
     }
 }

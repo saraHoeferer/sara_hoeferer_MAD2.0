@@ -20,9 +20,7 @@ fun DetailScreen(
     movieId:String?){
 
     movieId?.let {
-        val movie = moviesViewModel.movieList.filter { it.id == movieId }[0]
-
-        // needed for show/hide snackbar
+        val movie = moviesViewModel.movieListState.value.filter { it.id == movieId  }[0]
         val scaffoldState = rememberScaffoldState() // this contains the `SnackbarHostState`
 
         Scaffold(scaffoldState = scaffoldState, // attaching `scaffoldState` to the `Scaffold`
@@ -32,15 +30,25 @@ fun DetailScreen(
                 }
             },
         ) { padding ->
-            MainContent(Modifier.padding(padding), movie)
+            MainContent(
+                Modifier.padding(padding),
+                movie,
+                onFavClick = { movie ->
+                    moviesViewModel.updateMovies(movie)
+                }
+            )
         }
     }
 }
 
 @Composable
-fun MainContent(modifier: Modifier = Modifier, movie: Movie) {
+fun MainContent(
+    modifier: Modifier = Modifier,
+    movie: Movie,
+    onFavClick: (Movie) -> Unit
+) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
@@ -50,7 +58,12 @@ fun MainContent(modifier: Modifier = Modifier, movie: Movie) {
             verticalArrangement = Arrangement.Top
         ) {
 
-            MovieRow(movie = movie)
+            MovieRow(
+                movie = movie,
+                onFavClick = { movie ->
+                    onFavClick(movie)
+                }
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 

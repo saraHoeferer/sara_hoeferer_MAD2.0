@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,6 +59,8 @@ fun MainContent(
             .padding(10.dp)
     ) {
 
+        val state by moviesViewModel.addMovieValidationState.collectAsState()
+
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
@@ -68,8 +71,9 @@ fun MainContent(
             SimpleTextField(
                 value = moviesViewModel.title.value,
                 label = stringResource(R.string.enter_movie_title),
-                isValid = moviesViewModel.isTitleValid.value,
-                errMsg = moviesViewModel.titleErrMsg.value
+                isValid = state.isTitleValid,
+                errMsg = state.titleErrMsg,
+                onDone = { moviesViewModel.validateTitle() }
             ) { input ->
                 moviesViewModel.title.value = input
                 moviesViewModel.validateTitle()
@@ -78,8 +82,8 @@ fun MainContent(
             SimpleTextField(
                 value = moviesViewModel.year.value,
                 label = stringResource(id = R.string.enter_movie_year),
-                errMsg = moviesViewModel.yearErrMsg.value,
-                isValid = moviesViewModel.isYearValid.value,
+                errMsg = state.yearErrMsg,
+                isValid = state.isYearValid,
             ) {
                 moviesViewModel.year.value = it
                 moviesViewModel.validateYear()
@@ -115,7 +119,7 @@ fun MainContent(
 
             Text(
                 modifier = Modifier.padding(start = 8.dp),
-                text = moviesViewModel.genreErrMsg.value,
+                text = state.genreErrMsg,
                 fontSize = 14.sp,
                 color = MaterialTheme.colors.error
             )
@@ -123,8 +127,8 @@ fun MainContent(
             SimpleTextField(
                 value = moviesViewModel.director.value,
                 label = stringResource(R.string.enter_director),
-                errMsg = moviesViewModel.directorErrMsg.value,
-                isValid = moviesViewModel.isDirectorValid.value,
+                errMsg = state.directorErrMsg,
+                isValid = state.isDirectorValid,
             ) {
                 moviesViewModel.director.value = it
                 moviesViewModel.validateDirector()
@@ -133,8 +137,8 @@ fun MainContent(
             SimpleTextField(
                 value = moviesViewModel.actors.value,
                 label = stringResource(R.string.enter_actors),
-                errMsg = moviesViewModel.actorsErrMsg.value,
-                isValid = moviesViewModel.isActorsValid.value,
+                errMsg = state.actorsErrMsg,
+                isValid = state.isActorsValid,
             ) {
                 moviesViewModel.actors.value = it
                 moviesViewModel.validateActors()
@@ -153,8 +157,9 @@ fun MainContent(
             SimpleTextField(
                 value = moviesViewModel.rating.value,
                 label = stringResource(R.string.enter_rating),
-                errMsg = moviesViewModel.ratingErrMsg.value,
-                isValid = moviesViewModel.isRatingValid.value,
+                keyboardType = KeyboardType.Decimal,
+                errMsg = state.ratingErrMsg,
+                isValid = state.isRatingValid,
             ) {
                 moviesViewModel.rating.value = it
                 moviesViewModel.validateRating()

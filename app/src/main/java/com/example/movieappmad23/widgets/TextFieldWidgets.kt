@@ -2,11 +2,15 @@ package com.example.movieappmad23.widgets
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -18,6 +22,8 @@ fun SimpleTextField(
     errMsg: String = "",
     isValid: Boolean,
     singleLine: Boolean = true,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    onDone: () -> Unit = {},
     onChange: (String) -> Unit
 ){
     OutlinedTextField(
@@ -28,7 +34,17 @@ fun SimpleTextField(
             onChange(it)
         },
         label = { Text(text = label) },
-        isError = !isValid
+        isError = !isValid,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = ImeAction.Done,
+            keyboardType = keyboardType
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                onDone()
+            }
+        ),
+
     )
     if (errMsg.isNotEmpty()){
         Text(
