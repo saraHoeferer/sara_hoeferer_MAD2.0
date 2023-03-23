@@ -1,6 +1,5 @@
 package com.example.movieappmad23.viewmodels
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.toMutableStateList
@@ -16,6 +15,9 @@ class MoviesViewModel: ViewModel() {
     private val _movieList = getMovies().toMutableStateList()   //get all movies and create an observable state list
     val movieList: List<Movie>  // expose previously created list but immutable
         get() = _movieList
+
+    val favoriteMovies: List<Movie>
+        get() = _movieList.filter { it.isFavorite == true }
 
     // validation fields
     var isEnabledSaveButton: MutableState<Boolean> = mutableStateOf(false)
@@ -38,69 +40,31 @@ class MoviesViewModel: ViewModel() {
 
     var plot = mutableStateOf("")
 
-    private val _allGenres : List<Genre> = Genre.values().toList()
-
-    var selectableGenreItems = _allGenres.map {genre ->
-        ListItemSelectable(
-            title = genre.toString(),
-            isSelected = false
-        )
+    var genreErrMsg: MutableState<String> = mutableStateOf("")
+    var selectableGenreItems = Genre.values().toList().map {genre ->
+        ListItemSelectable(title = genre.toString())
     }.toMutableStateList()
-    /*
-    var selectableGenreItems: List<ListItemSelectable> = listOf()
-        get() = _allGenres.value.map { genre ->
-            ListItemSelectable(
-                title = genre.toString(),
-                isSelected = false
-            )
-        }
-
-     */
-    private val selectedGenres: List<Genre> = selectableGenreItems.filter { item -> item.isSelected }
-        .map { listItemSelectable ->
-            Genre.valueOf(listItemSelectable.title)
-        }
-    /*
-    var selectableGenreItems = mutableStateListOf(
-            _allGenres.map { genre ->
-                ListItemSelectable(
-                    title = genre.toString(),
-                    isSelected = false
-                )
-            }
-        )
-
-
-     */
-
 
     var rating = mutableStateOf("")
     var isRatingValid: MutableState<Boolean> = mutableStateOf(false)
     var ratingErrMsg: MutableState<String> = mutableStateOf("")
-
-    val favoriteMovies: List<Movie>
-        get() = _movieList.filter { it.isFavorite == true }
 
     // find provided movie by id and toggle its isFavorite attribute
     fun toggleFavorite(movie: Movie) = movieList.find { it.id == movie.id }?.let { movie ->
         movie.isFavorite = !movie.isFavorite
     }
 
-    fun selectGenre(selectedItem: ListItemSelectable) {
-        selectableGenreItems = selectableGenreItems.map {
-            if (it.title == selectedItem.title) {
-                selectedItem.copy(isSelected = !selectedItem.isSelected)
-            } else {
-                it
-            }
-        }.toMutableStateList()
+    fun selectGenre(selectedItem: ListItemSelectable) = selectableGenreItems.find { it.title == selectedItem.title }?.let { genre ->
+        genre.isSelected = !genre.isSelected
     }
+
     private fun shouldEnableAddButton() {
         isEnabledSaveButton.value = titleErrMsg.value.isEmpty()
                 && yearErrMsg.value.isEmpty()
                 && directorErrMsg.value.isEmpty()
                 && actorsErrMsg.value.isEmpty()
                 && ratingErrMsg.value.isEmpty()
+                && genreErrMsg.value.isEmpty()
     }
 
     fun validateTitle() {
@@ -166,10 +130,19 @@ class MoviesViewModel: ViewModel() {
     }
 
     fun validateGenres(){
-
+        if(selectableGenreItems.filter { item -> item.isSelected }.isEmpty()) {
+            genreErrMsg.value = "Genre is required."
+        } else {
+            genreErrMsg.value = ""
+        }
     }
 
     fun addMovie() {
+        val selectedGenres = selectableGenreItems.filter { item -> item.isSelected }
+            .map { listItemSelectable ->
+                Genre.valueOf(listItemSelectable.title)
+            }
+
         val movie = Movie(
             id = UUID.randomUUID().toString(),
             title = title.value,
@@ -182,8 +155,6 @@ class MoviesViewModel: ViewModel() {
             rating = rating.value.toFloat()
         )
 
-        Log.i("addMovie", movie.genre.toString())
+        _movieList.add(movie)
     }
-
-
 }

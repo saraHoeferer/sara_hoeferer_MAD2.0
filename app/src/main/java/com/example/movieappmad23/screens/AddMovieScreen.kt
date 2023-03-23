@@ -14,11 +14,11 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.movieappmad23.R
-import com.example.movieappmad23.models.Genre
-import com.example.movieappmad23.models.ListItemSelectable
 import com.example.movieappmad23.viewmodels.MoviesViewModel
+import com.example.movieappmad23.widgets.SimpleTextField
 import com.example.movieappmad23.widgets.SimpleTopAppBar
 
 @Composable
@@ -38,7 +38,8 @@ fun AddMovieScreen(
     ) { padding ->
         MainContent(
             Modifier.padding(padding),
-            moviesViewModel = moviesViewModel
+            moviesViewModel = moviesViewModel,
+            navController = navController
         )
     }
 }
@@ -47,7 +48,8 @@ fun AddMovieScreen(
 @Composable
 fun MainContent(
     modifier: Modifier = Modifier,
-    moviesViewModel: MoviesViewModel
+    moviesViewModel: MoviesViewModel,
+    navController: NavController
 ) {
     Surface(
         modifier = modifier
@@ -63,42 +65,25 @@ fun MainContent(
             horizontalAlignment = Alignment.Start
         ) {
 
-            val genres = Genre.values().toList()
-
-            var genreItems by remember {
-                mutableStateOf(
-                    genres.map { genre ->
-                        ListItemSelectable(
-                            title = genre.toString(),
-                            isSelected = false
-                        )
-                    }
-                )
+            SimpleTextField(
+                value = moviesViewModel.title.value,
+                label = stringResource(R.string.enter_movie_title),
+                isValid = moviesViewModel.isTitleValid.value,
+                errMsg = moviesViewModel.titleErrMsg.value
+            ) { input ->
+                moviesViewModel.title.value = input
+                moviesViewModel.validateTitle()
             }
 
-            OutlinedTextField(
-                value = moviesViewModel.title.value,
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                onValueChange = {
-                    moviesViewModel.title.value = it
-                    moviesViewModel.validateTitle()
-                },
-                label = { Text(text = stringResource(R.string.enter_movie_title)) },
-                isError = !moviesViewModel.isTitleValid.value
-            )
-
-            OutlinedTextField(
+            SimpleTextField(
                 value = moviesViewModel.year.value,
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                onValueChange = {
-                    moviesViewModel.year.value = it
-                    moviesViewModel.validateYear()
-                },
-                label = { Text(stringResource(R.string.enter_movie_year)) },
-                isError = !moviesViewModel.isYearValid.value
-            )
+                label = stringResource(id = R.string.enter_movie_year),
+                errMsg = moviesViewModel.yearErrMsg.value,
+                isValid = moviesViewModel.isYearValid.value,
+            ) {
+                moviesViewModel.year.value = it
+                moviesViewModel.validateYear()
+            }
 
             Text(
                 modifier = Modifier.padding(top = 4.dp),
@@ -120,6 +105,7 @@ fun MainContent(
                         ),
                         onClick = {
                             moviesViewModel.selectGenre(genreItem)
+                            moviesViewModel.validateGenres()
                         }
                     ) {
                         Text(text = genreItem.title)
@@ -127,54 +113,59 @@ fun MainContent(
                 }
             }
 
-            OutlinedTextField(
+            Text(
+                modifier = Modifier.padding(start = 8.dp),
+                text = moviesViewModel.genreErrMsg.value,
+                fontSize = 14.sp,
+                color = MaterialTheme.colors.error
+            )
+
+            SimpleTextField(
                 value = moviesViewModel.director.value,
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                onValueChange = {
-                    moviesViewModel.director.value = it
-                    moviesViewModel.validateDirector()
-                },
-                label = { Text(stringResource(R.string.enter_director)) },
-                isError = !moviesViewModel.isDirectorValid.value
-            )
+                label = stringResource(R.string.enter_director),
+                errMsg = moviesViewModel.directorErrMsg.value,
+                isValid = moviesViewModel.isDirectorValid.value,
+            ) {
+                moviesViewModel.director.value = it
+                moviesViewModel.validateDirector()
+            }
 
-            OutlinedTextField(
+            SimpleTextField(
                 value = moviesViewModel.actors.value,
-                modifier = Modifier.fillMaxWidth(),
-                onValueChange = {
-                    moviesViewModel.actors.value = it
-                    moviesViewModel.validateActors()
-                },
-                label = { Text(stringResource(R.string.enter_actors)) },
-                isError = !moviesViewModel.isActorsValid.value
-            )
+                label = stringResource(R.string.enter_actors),
+                errMsg = moviesViewModel.actorsErrMsg.value,
+                isValid = moviesViewModel.isActorsValid.value,
+            ) {
+                moviesViewModel.actors.value = it
+                moviesViewModel.validateActors()
+            }
 
-            OutlinedTextField(
+            SimpleTextField(
                 value = moviesViewModel.plot.value,
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp),
-                onValueChange = { moviesViewModel.plot.value = it },
-                label = { Text(textAlign = TextAlign.Start, text = stringResource(R.string.enter_plot)) }
-            )
+                label = stringResource(R.string.enter_plot),
+                isValid = true,
+                singleLine = false,
+                modifier = Modifier.height(120.dp)
+            ) {
+                moviesViewModel.plot.value = it
+            }
 
-            OutlinedTextField(
+            SimpleTextField(
                 value = moviesViewModel.rating.value,
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                onValueChange = {
-                    moviesViewModel.rating.value = it
-                    moviesViewModel.validateRating()
-                },
-                label = { Text(stringResource(R.string.enter_rating)) },
-                isError = !moviesViewModel.isRatingValid.value
-            )
+                label = stringResource(R.string.enter_rating),
+                errMsg = moviesViewModel.ratingErrMsg.value,
+                isValid = moviesViewModel.isRatingValid.value,
+            ) {
+                moviesViewModel.rating.value = it
+                moviesViewModel.validateRating()
+            }
 
             Button(
                 enabled = moviesViewModel.isEnabledSaveButton.value,
-                onClick = { moviesViewModel.addMovie() }) {
+                onClick = {
+                    moviesViewModel.addMovie()
+                    navController.navigate(Screen.MainScreen.route)
+                }) {
                 Text(text = stringResource(R.string.add))
             }
         }

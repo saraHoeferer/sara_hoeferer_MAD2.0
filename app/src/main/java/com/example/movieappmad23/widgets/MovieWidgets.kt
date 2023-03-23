@@ -3,6 +3,7 @@ package com.example.movieappmad23.widgets
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -58,7 +60,11 @@ fun MovieRow(
                 .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                MovieImage(imageUrl = movie.images[0])
+                if(movie.images.isNotEmpty()){
+                    MovieImage(imageUrl = movie.images[0])
+                } else {
+                    Image(painter = painterResource(id = R.drawable.no_image_placeholder), contentDescription = "Prev Image")
+                }
                 FavoriteIcon(movie, onFavClick)
             }
 
@@ -147,7 +153,17 @@ fun MovieDetails(modifier: Modifier = Modifier, movie: Movie) {
         Column (modifier = modifier) {
             Text(text = "Director: ${movie.director}", style = MaterialTheme.typography.caption)
             Text(text = "Released: ${movie.year}", style = MaterialTheme.typography.caption)
-            Text(text = "Genre: ${movie.genre}", style = MaterialTheme.typography.caption)
+            Text(buildAnnotatedString {
+                withStyle(style = SpanStyle(color = Color.DarkGray, fontSize = 13.sp)) {
+                    append("Genres: ")
+                }
+
+                for ( genre in movie.genre){
+                    append("$genre ")
+                }
+                },
+                style = MaterialTheme.typography.caption
+            )
             Text(text = "Actors: ${movie.actors}", style = MaterialTheme.typography.caption)
             Text(text = "Rating: ${movie.rating}", style = MaterialTheme.typography.caption)
 

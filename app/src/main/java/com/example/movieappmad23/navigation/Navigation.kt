@@ -35,8 +35,9 @@ fun Navigation() {
             Screen.DetailScreen.route,
             arguments = listOf(navArgument(name = DETAIL_ARGUMENT_KEY) {type = NavType.StringType})
         ) { backStackEntry ->    // backstack contains all information from navhost
-            DetailScreen(navController = navController, backStackEntry.arguments?.getString(
-                DETAIL_ARGUMENT_KEY))   // get the argument from navhost that will be passed
+            DetailScreen(navController = navController,
+                moviesViewModel = movieViewModel,
+                movieId = backStackEntry.arguments?.getString(DETAIL_ARGUMENT_KEY))   // get the argument from navhost that will be passed
         }
     }
 }
