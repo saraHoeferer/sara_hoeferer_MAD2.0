@@ -140,3 +140,14 @@ fun getMovies(): List<Movie> {
 
         )
 }
+
+fun getSpecificMovie(movieId: String?): Movie {
+    val movies = getMovies()
+    var movie: Movie = movies[0]
+    for (item: Movie in movies) {
+        if (item.id == movieId) {
+            movie = item
+        }
+    }
+    return movie
+}

@@ -1,4 +1,4 @@
-package com.example.movieapp.Menus
+package com.example.movieapp.menu
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
