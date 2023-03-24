@@ -25,18 +25,18 @@ class MoviesViewModel: ViewModel() {
     val favoriteMovies: List<Movie>
         get() = _movieListState.value.filter { it.isFavorite == true }
 
+    var movieToAdd: Movie = Movie()
     // validation fields
     var isEnabledSaveButton: MutableState<Boolean> = mutableStateOf(false)
-
-    var title = mutableStateOf("")
-    var year = mutableStateOf("")
-    var director = mutableStateOf("")
-    var actors = mutableStateOf("")
-    var plot = mutableStateOf("")
+    var title = mutableStateOf(movieToAdd.title)
+    var year = mutableStateOf(movieToAdd.year)
+    var director = mutableStateOf(movieToAdd.director)
+    var actors = mutableStateOf(movieToAdd.actors)
+    var plot = mutableStateOf(movieToAdd.plot)
+    var rating = mutableStateOf(movieToAdd.rating)
     var selectableGenreItems = Genre.values().toList().map {genre ->
         ListItemSelectable(title = genre.toString())
     }.toMutableStateList()
-    var rating = mutableStateOf("")
 
     init {
         _movieListState.value = getMovies()
@@ -138,7 +138,7 @@ class MoviesViewModel: ViewModel() {
     }
 
     fun validateRating(){
-        val ratingVal = rating.value.toFloatOrNull()
+        val ratingVal = rating.value
         if(rating.value.trim().isNotEmpty()
             && !rating.value.startsWith("0")
             && (ratingVal != null)

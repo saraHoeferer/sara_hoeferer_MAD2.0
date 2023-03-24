@@ -3,14 +3,15 @@ package com.example.movieappmad23.models
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import java.util.*
 
 class Movie(
-    val id: String,
-    val title: String,
-    val year: String,
-    val genre: List<Genre>,
-    val director: String,
-    val actors: String,
+    val id: String = UUID.randomUUID().toString(),
+    val title: String = "",
+    val year: String = "",
+    val genre: List<Genre> = listOf(),
+    val director: String = "",
+    val actors: String = "",
     val plot: String = "No plot available",
     val images: List<String> = listOf(),
     val rating: Float = 0f,

@@ -155,7 +155,7 @@ fun MainContent(
             }
 
             SimpleTextField(
-                value = moviesViewModel.rating.value,
+                value = moviesViewModel.rating.value.toString(),
                 label = stringResource(R.string.enter_rating),
                 keyboardType = KeyboardType.Decimal,
                 errMsg = state.ratingErrMsg,
