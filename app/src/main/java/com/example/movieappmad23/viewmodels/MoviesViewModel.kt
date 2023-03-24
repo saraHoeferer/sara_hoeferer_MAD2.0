@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import java.util.*
 
 // inherit from ViewModel class
 class MoviesViewModel: ViewModel() {
@@ -23,17 +22,16 @@ class MoviesViewModel: ViewModel() {
     val addMovieValidationState: StateFlow<AddMovieValidationState> = _addMovieValidationState
 
     val favoriteMovies: List<Movie>
-        get() = _movieListState.value.filter { it.isFavorite == true }
+        get() = _movieListState.value.filter { it.isFavorite }
 
-    var movieToAdd: Movie = Movie()
     // validation fields
     var isEnabledSaveButton: MutableState<Boolean> = mutableStateOf(false)
-    var title = mutableStateOf(movieToAdd.title)
-    var year = mutableStateOf(movieToAdd.year)
-    var director = mutableStateOf(movieToAdd.director)
-    var actors = mutableStateOf(movieToAdd.actors)
-    var plot = mutableStateOf(movieToAdd.plot)
-    var rating = mutableStateOf(movieToAdd.rating)
+    var title = mutableStateOf("")
+    var year = mutableStateOf("")
+    var director = mutableStateOf("")
+    var actors = mutableStateOf("")
+    var plot = mutableStateOf("")
+    var rating = mutableStateOf("")
     var selectableGenreItems = Genre.values().toList().map {genre ->
         ListItemSelectable(title = genre.toString())
     }.toMutableStateList()
@@ -51,13 +49,12 @@ class MoviesViewModel: ViewModel() {
     }
 
     private fun shouldEnableAddButton() {
-        isEnabledSaveButton.value =
-                addMovieValidationState.value.titleErrMsg.isEmpty()
-                && addMovieValidationState.value.yearErrMsg.isEmpty()
-                && addMovieValidationState.value.directorErrMsg.isEmpty()
-                && addMovieValidationState.value.actorsErrMsg.isEmpty()
-                && addMovieValidationState.value.ratingErrMsg.isEmpty()
-                && addMovieValidationState.value.genreErrMsg.isEmpty()
+        isEnabledSaveButton.value = title.value.trim().isNotEmpty()
+                && year.value.trim().isNotEmpty()
+                && director.value.trim().isNotEmpty()
+                && actors.value.trim().isNotEmpty()
+                && rating.value.trim().isNotEmpty() && _addMovieValidationState.value.ratingErrMsg.isEmpty()
+                && _addMovieValidationState.value.genreErrMsg.isEmpty()
     }
 
     fun validateTitle() {
@@ -68,7 +65,6 @@ class MoviesViewModel: ViewModel() {
                     titleErrMsg = ""
                 )
             }
-            shouldEnableAddButton()
         } else {
             _addMovieValidationState.update { currentState ->
                 currentState.copy(
@@ -77,6 +73,7 @@ class MoviesViewModel: ViewModel() {
                 )
             }
         }
+        shouldEnableAddButton()
     }
 
     fun validateYear() {
@@ -87,7 +84,6 @@ class MoviesViewModel: ViewModel() {
                     yearErrMsg = ""
                 )
             }
-            shouldEnableAddButton()
         } else {
             _addMovieValidationState.update { currentState ->
                 currentState.copy(
@@ -96,6 +92,7 @@ class MoviesViewModel: ViewModel() {
                 )
             }
         }
+        shouldEnableAddButton()
     }
 
     fun validateDirector() {
@@ -106,7 +103,6 @@ class MoviesViewModel: ViewModel() {
                     directorErrMsg = ""
                 )
             }
-            shouldEnableAddButton()
         } else {
             _addMovieValidationState.update { currentState ->
                 currentState.copy(
@@ -115,6 +111,7 @@ class MoviesViewModel: ViewModel() {
                 )
             }
         }
+        shouldEnableAddButton()
     }
 
     fun validateActors() {
@@ -125,7 +122,6 @@ class MoviesViewModel: ViewModel() {
                     actorsErrMsg = ""
                 )
             }
-            shouldEnableAddButton()
         } else {
             _addMovieValidationState.update { currentState ->
                 currentState.copy(
@@ -138,7 +134,8 @@ class MoviesViewModel: ViewModel() {
     }
 
     fun validateRating(){
-        val ratingVal = rating.value
+        val ratingVal = rating.value.toFloatOrNull()
+
         if(rating.value.trim().isNotEmpty()
             && !rating.value.startsWith("0")
             && (ratingVal != null)
@@ -151,7 +148,6 @@ class MoviesViewModel: ViewModel() {
                     ratingErrMsg = ""
                 )
             }
-            shouldEnableAddButton()
         } else {
             _addMovieValidationState.update { currentState ->
                 currentState.copy(
@@ -178,6 +174,7 @@ class MoviesViewModel: ViewModel() {
                 )
             }
         }
+        shouldEnableAddButton()
     }
 
     fun addMovie() {
@@ -187,7 +184,6 @@ class MoviesViewModel: ViewModel() {
             }
 
         val movie = Movie(
-            id = UUID.randomUUID().toString(),
             title = title.value,
             director = director.value,
             actors = actors.value,
@@ -202,6 +198,23 @@ class MoviesViewModel: ViewModel() {
             val list: MutableList<Movie> = _movieListState.value.toMutableList()
             list.add(movie)
             list
+        }
+
+        reset()
+    }
+
+    fun reset() {
+        isEnabledSaveButton.value = false
+        _addMovieValidationState.value = AddMovieValidationState()
+        title.value = ""
+        director.value = ""
+        actors.value = ""
+        plot.value = ""
+        year.value = ""
+        rating.value = ""
+
+        selectableGenreItems.find { it.isSelected }?.let { genre ->
+            genre.isSelected = false
         }
     }
 }
