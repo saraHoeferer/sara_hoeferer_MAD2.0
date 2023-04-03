@@ -20,7 +20,7 @@ fun SimpleTextField(
     value: String,
     label: String,
     errMsg: String = "",
-    isValid: Boolean,
+    isError: Boolean,
     singleLine: Boolean = true,
     keyboardType: KeyboardType = KeyboardType.Text,
     onDone: () -> Unit = {},
@@ -34,7 +34,7 @@ fun SimpleTextField(
             onChange(it)
         },
         label = { Text(text = label) },
-        isError = !isValid,
+        isError = isError,
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Done,
             keyboardType = keyboardType
@@ -46,7 +46,7 @@ fun SimpleTextField(
         ),
 
     )
-    if (!isValid){
+    if (isError){
         Text(
             modifier = Modifier.padding(start = 8.dp),
             text = errMsg,

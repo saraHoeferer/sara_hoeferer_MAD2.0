@@ -61,12 +61,10 @@ fun MainContent(
     ) {
 
         MovieBody(
-            movieUiState = moviesViewModel.movieUiState.value,
-            onMovieValueChange = {
-                    event ->
-                moviesViewModel.onEvent(event) },
+            movieUiState = moviesViewModel.movieUiState,
+            onMovieValueChange = { newUiState, event -> moviesViewModel.updateUIState(newUiState, event)},
             onSaveClick = {
-                moviesViewModel.onEvent(AddMovieUIEvent.submit)
+                moviesViewModel.saveMovie()
                 navController.navigate(Screen.MainScreen.route)
             }
         )
@@ -76,7 +74,7 @@ fun MainContent(
 @Composable
 fun MovieBody(
     movieUiState: AddMovieUiState,
-    onMovieValueChange: (AddMovieUIEvent) -> Unit,
+    onMovieValueChange: (AddMovieUiState, AddMovieUIEvent) -> Unit,
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier
 ){
@@ -93,7 +91,6 @@ fun MovieBody(
             onClick = onSaveClick) {
             Text(text = stringResource(R.string.add))
         }
-
     }
 }
 
@@ -101,25 +98,25 @@ fun MovieBody(
 @Composable
 fun MovieInputForm(
     movieUiState: AddMovieUiState,
-    onMovieValueChange: (AddMovieUIEvent) -> Unit,
+    onMovieValueChange: (AddMovieUiState, AddMovieUIEvent) -> Unit,
 ){
     SimpleTextField(
         value = movieUiState.title,
         label = stringResource(R.string.enter_movie_title),
-        //isValid = true,
-        isValid = movieUiState.titleErr,
+        isError = movieUiState.titleErr,
         errMsg = stringResource(id = R.string.title_required),
-        //onDone = { moviesViewModel.validateTitle() },
         onChange = { input ->
-            onMovieValueChange(AddMovieUIEvent.TitleChanged(input))}
+            onMovieValueChange(movieUiState.copy(title = input), AddMovieUIEvent.TitleChanged)
+        }
     )
 
     SimpleTextField(
         value = movieUiState.year,
         label = stringResource(id = R.string.enter_movie_year),
         errMsg = stringResource(id = R.string.year_required),
-        isValid = movieUiState.yearErr,
-        onChange = { input ->  onMovieValueChange(AddMovieUIEvent.YearChanged(input))}
+        isError = movieUiState.yearErr,
+        onChange = { input ->
+            onMovieValueChange(movieUiState.copy(year = input), AddMovieUIEvent.YearChanged) }
     )
 
     Text(
@@ -141,7 +138,7 @@ fun MovieInputForm(
                         colorResource(id = R.color.white)
                 ),
                 onClick = {
-                    onMovieValueChange(AddMovieUIEvent.GenresChanged(movieUiState.selectGenre(genreItem)))
+                    onMovieValueChange(movieUiState.copy(genre = movieUiState.selectGenre(genreItem)), AddMovieUIEvent.GenresChanged)
                 }
             ) {
                 Text(text = genreItem.title)
@@ -149,36 +146,38 @@ fun MovieInputForm(
         }
     }
 
-    Text(
-        modifier = Modifier.padding(start = 8.dp),
-        text = stringResource(id = R.string.genres_required),
-        fontSize = 14.sp,
-        color = MaterialTheme.colors.error
-    )
+    if(movieUiState.genreErr){
+        Text(
+            modifier = Modifier.padding(start = 8.dp),
+            text = stringResource(id = R.string.genres_required),
+            fontSize = 14.sp,
+            color = MaterialTheme.colors.error
+        )
+    }
 
     SimpleTextField(
         value = movieUiState.director,
         label = stringResource(R.string.enter_director),
         errMsg = stringResource(id = R.string.director_required),
-        isValid = movieUiState.directorErr,
-        onChange = { input ->  onMovieValueChange(AddMovieUIEvent.DirectorChanged(input))},
+        isError = movieUiState.directorErr,
+        onChange = { input ->  onMovieValueChange(movieUiState.copy(director = input), AddMovieUIEvent.DirectorChanged)},
     )
 
     SimpleTextField(
         value = movieUiState.actors,
         label = stringResource(R.string.enter_actors),
         errMsg = stringResource(id = R.string.actors_required),
-        isValid = movieUiState.actorsErr,
-        onChange = { input ->  onMovieValueChange(AddMovieUIEvent.ActorsChanged(input))},
+        isError = movieUiState.actorsErr,
+        onChange = { input ->  onMovieValueChange(movieUiState.copy(actors = input), AddMovieUIEvent.ActorsChanged)},
     )
 
     SimpleTextField(
         value = movieUiState.plot,
         label = stringResource(R.string.enter_plot),
-        isValid = true,
+        isError = false,
         singleLine = false,
         modifier = Modifier.height(120.dp),
-        onChange = { input ->  onMovieValueChange(AddMovieUIEvent.PlotChanged(input))},
+        onChange = { input ->  onMovieValueChange(movieUiState.copy(plot = input), AddMovieUIEvent.PlotChanged)},
     )
 
     SimpleTextField(
@@ -186,7 +185,7 @@ fun MovieInputForm(
         label = stringResource(R.string.enter_rating),
         keyboardType = KeyboardType.Decimal,
         errMsg = stringResource(id = R.string.rating_required),
-        isValid = movieUiState.ratingErr,
-        onChange = { input ->  onMovieValueChange(AddMovieUIEvent.RatingChanged(input))},
+        isError = movieUiState.ratingErr,
+        onChange = { input ->  onMovieValueChange(movieUiState.copy(rating = input), AddMovieUIEvent.RatingChanged)},
     )
 }

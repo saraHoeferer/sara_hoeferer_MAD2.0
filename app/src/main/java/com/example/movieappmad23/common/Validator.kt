@@ -24,12 +24,11 @@ object Validator {
     }
 
     fun validateMovieRating(rating: String): ValidationResult {
-        val result = rating.isNotBlank() && rating.toDoubleOrNull()?.let { it in 0.0..10.0 } != null
+        val result = rating.isNotBlank() && rating.toDoubleOrNull() != null && rating.toDouble().let { it in 0.0..10.0 }
         return ValidationResult(result)
     }
 }
 
 data class ValidationResult(
-    val successful: Boolean,
-    val errorMessage: String? = null
+    val successful: Boolean
 )
