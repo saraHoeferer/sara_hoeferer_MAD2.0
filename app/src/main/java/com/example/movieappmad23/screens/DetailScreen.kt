@@ -34,7 +34,7 @@ fun DetailScreen(
                 Modifier.padding(padding),
                 movie,
                 onFavClick = { movie ->
-                    moviesViewModel.updateMovies(movie)
+                    moviesViewModel.updateFavoriteMovies(movie)
                 }
             )
         }

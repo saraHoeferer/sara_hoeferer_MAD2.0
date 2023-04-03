@@ -29,7 +29,7 @@ fun FavoriteScreen(navController: NavController, moviesViewModel: MoviesViewMode
                             navController.navigate(route = Screen.DetailScreen.withId(movieId))
                         },
                         onFavClick = { movie ->
-                            moviesViewModel.updateMovies(movie)
+                            moviesViewModel.updateFavoriteMovies(movie)
                         }
                     )
                 }

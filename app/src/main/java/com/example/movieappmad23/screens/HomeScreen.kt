@@ -91,7 +91,7 @@ fun MovieList(
                     navController.navigate(Screen.DetailScreen.withId(movieId))
                 },
                 onFavClick  = { movie ->
-                    viewModel.updateMovies(movie)
+                    viewModel.updateFavoriteMovies(movie)
                 }
             )
         }

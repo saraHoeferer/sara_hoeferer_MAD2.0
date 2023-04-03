@@ -45,13 +45,14 @@ fun AddMovieScreen(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainContent(
     modifier: Modifier = Modifier,
     moviesViewModel: MoviesViewModel,
     navController: NavController
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -59,120 +60,133 @@ fun MainContent(
             .padding(10.dp)
     ) {
 
-        val state by moviesViewModel.addMovieValidationState.collectAsState()
-
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.Start
-        ) {
-
-            SimpleTextField(
-                value = moviesViewModel.title.value,
-                label = stringResource(R.string.enter_movie_title),
-                isValid = state.isTitleValid,
-                errMsg = state.titleErrMsg,
-                onDone = { moviesViewModel.validateTitle() }
-            ) { input ->
-                moviesViewModel.title.value = input
-                moviesViewModel.validateTitle()
+        MovieBody(
+            movieUiState = moviesViewModel.movieUiState.value,
+            onMovieValueChange = {
+                    event ->
+                moviesViewModel.onEvent(event) },
+            onSaveClick = {
+                moviesViewModel.onEvent(AddMovieUIEvent.submit)
+                navController.navigate(Screen.MainScreen.route)
             }
+        )
+    }
+}
 
-            SimpleTextField(
-                value = moviesViewModel.year.value,
-                label = stringResource(id = R.string.enter_movie_year),
-                errMsg = state.yearErrMsg,
-                isValid = state.isYearValid,
-            ) {
-                moviesViewModel.year.value = it
-                moviesViewModel.validateYear()
-            }
+@Composable
+fun MovieBody(
+    movieUiState: AddMovieUiState,
+    onMovieValueChange: (AddMovieUIEvent) -> Unit,
+    onSaveClick: () -> Unit,
+    modifier: Modifier = Modifier
+){
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.Start
+    ) {
+        MovieInputForm(movieUiState = movieUiState, onMovieValueChange = onMovieValueChange)
 
-            Text(
-                modifier = Modifier.padding(top = 4.dp),
-                text = stringResource(R.string.select_genres),
-                textAlign = TextAlign.Start,
-                style = MaterialTheme.typography.h6)
+        Button(
+            enabled = movieUiState.actionEnabled,
+            onClick = onSaveClick) {
+            Text(text = stringResource(R.string.add))
+        }
 
-            LazyHorizontalGrid(
-                modifier = Modifier.height(100.dp),
-                rows = GridCells.Fixed(3)){
-                items(moviesViewModel.selectableGenreItems) { genreItem ->
-                    Chip(
-                        modifier = Modifier.padding(2.dp),
-                        colors = ChipDefaults.chipColors(
-                            backgroundColor = if (genreItem.isSelected)
-                                colorResource(id = R.color.purple_200)
-                            else
-                                colorResource(id = R.color.white)
-                        ),
-                        onClick = {
-                            moviesViewModel.selectGenre(genreItem)
-                            moviesViewModel.validateGenres()
-                        }
-                    ) {
-                        Text(text = genreItem.title)
-                    }
-                }
-            }
+    }
+}
 
-            Text(
-                modifier = Modifier.padding(start = 8.dp),
-                text = state.genreErrMsg,
-                fontSize = 14.sp,
-                color = MaterialTheme.colors.error
-            )
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun MovieInputForm(
+    movieUiState: AddMovieUiState,
+    onMovieValueChange: (AddMovieUIEvent) -> Unit,
+){
+    SimpleTextField(
+        value = movieUiState.title,
+        label = stringResource(R.string.enter_movie_title),
+        //isValid = true,
+        isValid = movieUiState.titleErr,
+        errMsg = stringResource(id = R.string.title_required),
+        //onDone = { moviesViewModel.validateTitle() },
+        onChange = { input ->
+            onMovieValueChange(AddMovieUIEvent.TitleChanged(input))}
+    )
 
-            SimpleTextField(
-                value = moviesViewModel.director.value,
-                label = stringResource(R.string.enter_director),
-                errMsg = state.directorErrMsg,
-                isValid = state.isDirectorValid,
-            ) {
-                moviesViewModel.director.value = it
-                moviesViewModel.validateDirector()
-            }
+    SimpleTextField(
+        value = movieUiState.year,
+        label = stringResource(id = R.string.enter_movie_year),
+        errMsg = stringResource(id = R.string.year_required),
+        isValid = movieUiState.yearErr,
+        onChange = { input ->  onMovieValueChange(AddMovieUIEvent.YearChanged(input))}
+    )
 
-            SimpleTextField(
-                value = moviesViewModel.actors.value,
-                label = stringResource(R.string.enter_actors),
-                errMsg = state.actorsErrMsg,
-                isValid = state.isActorsValid,
-            ) {
-                moviesViewModel.actors.value = it
-                moviesViewModel.validateActors()
-            }
+    Text(
+        modifier = Modifier.padding(top = 4.dp),
+        text = stringResource(R.string.select_genres),
+        textAlign = TextAlign.Start,
+        style = MaterialTheme.typography.h6)
 
-            SimpleTextField(
-                value = moviesViewModel.plot.value,
-                label = stringResource(R.string.enter_plot),
-                isValid = true,
-                singleLine = false,
-                modifier = Modifier.height(120.dp)
-            ) {
-                moviesViewModel.plot.value = it
-            }
-
-            SimpleTextField(
-                value = moviesViewModel.rating.value.toString(),
-                label = stringResource(R.string.enter_rating),
-                keyboardType = KeyboardType.Decimal,
-                errMsg = state.ratingErrMsg,
-                isValid = state.isRatingValid,
-            ) {
-                moviesViewModel.rating.value = it
-                moviesViewModel.validateRating()
-            }
-
-            Button(
-                enabled = moviesViewModel.isEnabledSaveButton.value,
+    LazyHorizontalGrid(
+        modifier = Modifier.height(100.dp),
+        rows = GridCells.Fixed(3)){
+        items(movieUiState.selectableGenreItems) { genreItem ->
+            Chip(
+                modifier = Modifier.padding(2.dp),
+                colors = ChipDefaults.chipColors(
+                    backgroundColor = if (genreItem.isSelected)
+                        colorResource(id = R.color.purple_200)
+                    else
+                        colorResource(id = R.color.white)
+                ),
                 onClick = {
-                    moviesViewModel.addMovie()
-                    navController.navigate(Screen.MainScreen.route)
-                }) {
-                Text(text = stringResource(R.string.add))
+                    onMovieValueChange(AddMovieUIEvent.GenresChanged(movieUiState.selectGenre(genreItem)))
+                }
+            ) {
+                Text(text = genreItem.title)
             }
         }
     }
+
+    Text(
+        modifier = Modifier.padding(start = 8.dp),
+        text = stringResource(id = R.string.genres_required),
+        fontSize = 14.sp,
+        color = MaterialTheme.colors.error
+    )
+
+    SimpleTextField(
+        value = movieUiState.director,
+        label = stringResource(R.string.enter_director),
+        errMsg = stringResource(id = R.string.director_required),
+        isValid = movieUiState.directorErr,
+        onChange = { input ->  onMovieValueChange(AddMovieUIEvent.DirectorChanged(input))},
+    )
+
+    SimpleTextField(
+        value = movieUiState.actors,
+        label = stringResource(R.string.enter_actors),
+        errMsg = stringResource(id = R.string.actors_required),
+        isValid = movieUiState.actorsErr,
+        onChange = { input ->  onMovieValueChange(AddMovieUIEvent.ActorsChanged(input))},
+    )
+
+    SimpleTextField(
+        value = movieUiState.plot,
+        label = stringResource(R.string.enter_plot),
+        isValid = true,
+        singleLine = false,
+        modifier = Modifier.height(120.dp),
+        onChange = { input ->  onMovieValueChange(AddMovieUIEvent.PlotChanged(input))},
+    )
+
+    SimpleTextField(
+        value = movieUiState.rating,
+        label = stringResource(R.string.enter_rating),
+        keyboardType = KeyboardType.Decimal,
+        errMsg = stringResource(id = R.string.rating_required),
+        isValid = movieUiState.ratingErr,
+        onChange = { input ->  onMovieValueChange(AddMovieUIEvent.RatingChanged(input))},
+    )
 }

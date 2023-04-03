@@ -46,7 +46,7 @@ fun SimpleTextField(
         ),
 
     )
-    if (errMsg.isNotEmpty()){
+    if (!isValid){
         Text(
             modifier = Modifier.padding(start = 8.dp),
             text = errMsg,
