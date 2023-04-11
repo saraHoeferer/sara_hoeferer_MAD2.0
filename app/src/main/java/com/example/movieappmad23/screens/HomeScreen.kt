@@ -13,15 +13,17 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.movieappmad23.models.Movie
+import com.example.movieappmad23.models.MoviesViewModel
 import com.example.movieappmad23.models.getMovies
 import com.example.movieappmad23.widgets.HomeTopAppBar
 import com.example.movieappmad23.widgets.MovieRow
 
 @Composable
-fun HomeScreen(navController: NavController = rememberNavController()){
+fun HomeScreen(navController: NavController = rememberNavController(), moviesViewModel: MoviesViewModel){
     Scaffold(topBar = {
         HomeTopAppBar(
             title = "Home",
@@ -45,20 +47,20 @@ fun HomeScreen(navController: NavController = rememberNavController()){
             }
         )
     }) { padding ->
-        MainContent(modifier = Modifier.padding(padding), navController = navController)
+        MainContent(modifier = Modifier.padding(padding), navController = navController, moviesViewModel = moviesViewModel)
     }
 }
 
 @Composable
 fun MainContent(
     modifier: Modifier,
-    navController: NavController
+    navController: NavController,
+    moviesViewModel: MoviesViewModel
 ) {
-    val movies = getMovies()
     MovieList(
         modifier = modifier,
         navController = navController,
-        movies = movies
+        moviesViewModel =  moviesViewModel,
     )
 }
 
@@ -66,19 +68,21 @@ fun MainContent(
 fun MovieList(
     modifier: Modifier = Modifier,
     navController: NavController,
-    movies: List<Movie> = getMovies()
+    moviesViewModel: MoviesViewModel
 ) {
     LazyColumn (
         modifier = modifier,
         contentPadding = PaddingValues(all = 12.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        items(movies) { movie ->
+        items(moviesViewModel.movieList) { movie ->
             MovieRow(
                 movie = movie,
                 onItemClick = { movieId ->
                     navController.navigate(Screen.DetailScreen.withId(movieId))
-                }
+                },
+                onFavClick ={ movieId -> moviesViewModel.isLiked(movieId)}
+
             )
         }
     }

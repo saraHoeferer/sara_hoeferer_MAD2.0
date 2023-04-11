@@ -10,18 +10,21 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.movieappmad23.R
 import com.example.movieappmad23.models.Genre
 import com.example.movieappmad23.models.ListItemSelectable
+import com.example.movieappmad23.models.MoviesViewModel
 import com.example.movieappmad23.widgets.SimpleTopAppBar
 
 @Composable
-fun AddMovieScreen(navController: NavController){
+fun AddMovieScreen(navController: NavController, moviesViewModel: MoviesViewModel) {
     val scaffoldState = rememberScaffoldState()
 
     Scaffold(
@@ -32,15 +35,50 @@ fun AddMovieScreen(navController: NavController){
             }
         },
     ) { padding ->
-        MainContent(Modifier.padding(padding))
+        MainContent(
+            Modifier.padding(padding),
+            checkEmptyString = { input -> moviesViewModel.isNotEmpty(input) },
+            checkEmptyFloat = { input -> moviesViewModel.floatIsNotEmpty(input) },
+            checkEmptyGenre = { input -> moviesViewModel.genreNotEmpty(input) },
+            addMovie = { title, year, genre, director, actors, plot, rating ->
+                moviesViewModel.addMovie(
+                    title,
+                    year,
+                    genre,
+                    director,
+                    actors,
+                    plot,
+                    rating
+                )
+            },
+            navigateBack = { navController.popBackStack() })
     }
+}
+
+@Composable
+fun errorText(text: String) {
+    Text(
+        text = "$text",
+        color = Color.Red,
+        fontSize = 14.sp,
+        modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp)
+
+    )
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun MainContent(modifier: Modifier = Modifier) {
+fun MainContent(
+    modifier: Modifier = Modifier,
+    checkEmptyString: (String) -> Boolean,
+    checkEmptyFloat: (String) -> Boolean,
+    checkEmptyGenre: (List<ListItemSelectable>) -> Boolean,
+    addMovie: (String, String, List<ListItemSelectable>, String, String, String, String) -> Unit,
+    navigateBack: () -> Unit = {}
+) {
     Surface(
         modifier = modifier
+
             .fillMaxWidth()
             .fillMaxHeight()
             .padding(10.dp)
@@ -52,6 +90,29 @@ fun MainContent(modifier: Modifier = Modifier) {
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.Start
         ) {
+            var errorTitle by remember {
+                mutableStateOf(true)
+            }
+
+            var errorYear by remember {
+                mutableStateOf(true)
+            }
+
+            var errorGenre by remember {
+                mutableStateOf(true)
+            }
+
+            var errorDirector by remember {
+                mutableStateOf(true)
+            }
+
+            var errorActors by remember {
+                mutableStateOf(true)
+            }
+
+            var errorRating by remember {
+                mutableStateOf(true)
+            }
 
             var title by remember {
                 mutableStateOf("")
@@ -91,36 +152,50 @@ fun MainContent(modifier: Modifier = Modifier) {
             }
 
             var isEnabledSaveButton by remember {
-                mutableStateOf(true)
+                mutableStateOf(false)
             }
 
             OutlinedTextField(
                 value = title,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { title = it },
+                onValueChange = {
+                    title = it
+                    errorTitle = checkEmptyString(it)
+                },
                 label = { Text(text = stringResource(R.string.enter_movie_title)) },
-                isError = false
+                isError = errorTitle
             )
+            if (errorTitle) {
+                errorText(text = "Title is required")
+            }
 
             OutlinedTextField(
                 value = year,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { year = it },
+                onValueChange = {
+                    year = it
+                    errorYear = checkEmptyString(it)
+                },
                 label = { Text(stringResource(R.string.enter_movie_year)) },
-                isError = false
+                isError = errorYear
             )
+            if (errorYear) {
+                errorText(text = "Year is required")
+            }
 
             Text(
                 modifier = Modifier.padding(top = 4.dp),
                 text = stringResource(R.string.select_genres),
                 textAlign = TextAlign.Start,
-                style = MaterialTheme.typography.h6)
+                style = MaterialTheme.typography.h6
+            )
 
             LazyHorizontalGrid(
                 modifier = Modifier.height(100.dp),
-                rows = GridCells.Fixed(3)){
+                rows = GridCells.Fixed(3)
+            ) {
                 items(genreItems) { genreItem ->
                     Chip(
                         modifier = Modifier.padding(2.dp),
@@ -138,29 +213,45 @@ fun MainContent(modifier: Modifier = Modifier) {
                                     it
                                 }
                             }
+                            errorGenre = checkEmptyGenre(genreItems)
                         }
                     ) {
                         Text(text = genreItem.title)
                     }
                 }
             }
+            if (errorGenre) {
+                errorText(text = "At least one genre must be selected")
+            }
 
             OutlinedTextField(
                 value = director,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { director = it },
+                onValueChange = {
+                    director = it
+                    errorDirector = checkEmptyString(it)
+                },
                 label = { Text(stringResource(R.string.enter_director)) },
-                isError = false
+                isError = errorDirector
             )
+            if (errorDirector) {
+                errorText(text = "Director is required")
+            }
 
             OutlinedTextField(
                 value = actors,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = { actors = it },
+                onValueChange = {
+                    actors = it
+                    errorActors = checkEmptyString(it)
+                },
                 label = { Text(stringResource(R.string.enter_actors)) },
-                isError = false
+                isError = errorActors
             )
+            if (errorActors) {
+                errorText(text = "Actors are required")
+            }
 
             OutlinedTextField(
                 value = plot,
@@ -169,7 +260,12 @@ fun MainContent(modifier: Modifier = Modifier) {
                     .fillMaxWidth()
                     .height(120.dp),
                 onValueChange = { plot = it },
-                label = { Text(textAlign = TextAlign.Start, text = stringResource(R.string.enter_plot)) },
+                label = {
+                    Text(
+                        textAlign = TextAlign.Start,
+                        text = stringResource(R.string.enter_plot)
+                    )
+                },
                 isError = false
             )
 
@@ -178,19 +274,30 @@ fun MainContent(modifier: Modifier = Modifier) {
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 onValueChange = {
-                                rating = if(it.startsWith("0")) {
-                                    ""
-                                } else {
-                                    it
-                                }
+                    rating = if (it.startsWith("0")) {
+                        ""
+                    } else {
+                        it
+                    }
+                    errorRating = checkEmptyFloat(rating)
                 },
                 label = { Text(stringResource(R.string.enter_rating)) },
-                isError = false
+                isError = errorRating
             )
+            if (errorRating) {
+                errorText(text = "Rating is required (e.g. 1.2, 4, etc.)")
+            }
+
+            if (!errorTitle && !errorYear && !errorGenre && !errorDirector && !errorActors && !errorRating) {
+                isEnabledSaveButton = true
+            }
 
             Button(
                 enabled = isEnabledSaveButton,
-                onClick = { /*TODO add a new movie to the movie list*/ }) {
+                onClick = {
+                    addMovie(title, year, genreItems, director, actors, plot, rating)
+                    navigateBack()
+                }) {
                 Text(text = stringResource(R.string.add))
             }
         }
