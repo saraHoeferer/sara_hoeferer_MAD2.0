@@ -42,13 +42,13 @@ fun AddMovieScreen(navController: NavController, moviesViewModel: MoviesViewMode
             checkEmptyGenre = { input -> moviesViewModel.genreNotEmpty(input) },
             addMovie = { title, year, genre, director, actors, plot, rating ->
                 moviesViewModel.addMovie(
-                    title,
-                    year,
-                    genre,
-                    director,
-                    actors,
-                    plot,
-                    rating
+                    title = title,
+                    year = year,
+                    genres = genre,
+                    director = director,
+                    actors = actors,
+                    plot = plot,
+                    rating = rating
                 )
             },
             navigateBack = { navController.popBackStack() })
@@ -56,9 +56,9 @@ fun AddMovieScreen(navController: NavController, moviesViewModel: MoviesViewMode
 }
 
 @Composable
-fun errorText(text: String) {
+fun ErrorText(text: String) {
     Text(
-        text = "$text",
+        text = text,
         color = Color.Red,
         fontSize = 14.sp,
         modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp)
@@ -90,30 +90,6 @@ fun MainContent(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.Start
         ) {
-            var errorTitle by remember {
-                mutableStateOf(true)
-            }
-
-            var errorYear by remember {
-                mutableStateOf(true)
-            }
-
-            var errorGenre by remember {
-                mutableStateOf(true)
-            }
-
-            var errorDirector by remember {
-                mutableStateOf(true)
-            }
-
-            var errorActors by remember {
-                mutableStateOf(true)
-            }
-
-            var errorRating by remember {
-                mutableStateOf(true)
-            }
-
             var title by remember {
                 mutableStateOf("")
             }
@@ -159,30 +135,24 @@ fun MainContent(
                 value = title,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = {
-                    title = it
-                    errorTitle = checkEmptyString(it)
-                },
+                onValueChange = { title = it },
                 label = { Text(text = stringResource(R.string.enter_movie_title)) },
-                isError = errorTitle
+                isError = checkEmptyString(title)
             )
-            if (errorTitle) {
-                errorText(text = "Title is required")
+            if (checkEmptyString(title)) {
+                ErrorText(text = "Title is required")
             }
 
             OutlinedTextField(
                 value = year,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = {
-                    year = it
-                    errorYear = checkEmptyString(it)
-                },
+                onValueChange = { year = it },
                 label = { Text(stringResource(R.string.enter_movie_year)) },
-                isError = errorYear
+                isError = checkEmptyString(year)
             )
-            if (errorYear) {
-                errorText(text = "Year is required")
+            if (checkEmptyString(year)) {
+                ErrorText(text = "Year is required")
             }
 
             Text(
@@ -213,44 +183,38 @@ fun MainContent(
                                     it
                                 }
                             }
-                            errorGenre = checkEmptyGenre(genreItems)
                         }
                     ) {
                         Text(text = genreItem.title)
                     }
                 }
             }
-            if (errorGenre) {
-                errorText(text = "At least one genre must be selected")
+
+            if (checkEmptyGenre(genreItems)) {
+                ErrorText(text = "At least one genre must be selected")
             }
 
             OutlinedTextField(
                 value = director,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = {
-                    director = it
-                    errorDirector = checkEmptyString(it)
-                },
+                onValueChange = { director = it },
                 label = { Text(stringResource(R.string.enter_director)) },
-                isError = errorDirector
+                isError = checkEmptyString(director)
             )
-            if (errorDirector) {
-                errorText(text = "Director is required")
+            if (checkEmptyString(director)) {
+                ErrorText(text = "Director is required")
             }
 
             OutlinedTextField(
                 value = actors,
                 modifier = Modifier.fillMaxWidth(),
-                onValueChange = {
-                    actors = it
-                    errorActors = checkEmptyString(it)
-                },
+                onValueChange = { actors = it },
                 label = { Text(stringResource(R.string.enter_actors)) },
-                isError = errorActors
+                isError = checkEmptyString(actors)
             )
-            if (errorActors) {
-                errorText(text = "Actors are required")
+            if (checkEmptyString(actors)) {
+                ErrorText(text = "Actors are required")
             }
 
             OutlinedTextField(
@@ -279,16 +243,15 @@ fun MainContent(
                     } else {
                         it
                     }
-                    errorRating = checkEmptyFloat(rating)
                 },
                 label = { Text(stringResource(R.string.enter_rating)) },
-                isError = errorRating
+                isError = checkEmptyFloat(rating)
             )
-            if (errorRating) {
-                errorText(text = "Rating is required (e.g. 1.2, 4, etc.)")
+            if (checkEmptyFloat(rating)) {
+                ErrorText(text = "Rating is required (e.g. 1.2, 4, etc.)")
             }
 
-            if (!errorTitle && !errorYear && !errorGenre && !errorDirector && !errorActors && !errorRating) {
+            if (!checkEmptyString(title) && !checkEmptyString(year) && checkEmptyGenre(genreItems) && checkEmptyString(director) && checkEmptyString(actors) && checkEmptyFloat(rating)){
                 isEnabledSaveButton = true
             }
 

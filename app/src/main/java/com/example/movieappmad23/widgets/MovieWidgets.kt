@@ -27,13 +27,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.movieappmad23.R
 import com.example.movieappmad23.models.Movie
-import com.example.movieappmad23.models.MoviesViewModel
 import com.example.movieappmad23.models.getMovies
 import com.example.movieappmad23.ui.theme.Shapes
 
@@ -148,7 +146,7 @@ fun MovieDetails(modifier: Modifier = Modifier, movie: Movie) {
         exit = fadeOut()
     ) {
         Column (modifier = modifier) {
-            Text(text = "Director: ${movie.director} ${movie.id}", style = MaterialTheme.typography.caption)
+            Text(text = "Director: ${movie.director}", style = MaterialTheme.typography.caption)
             Text(text = "Released: ${movie.year}", style = MaterialTheme.typography.caption)
             Text(text = "Genre: ${movie.genre}", style = MaterialTheme.typography.caption)
             Text(text = "Actors: ${movie.actors}", style = MaterialTheme.typography.caption)

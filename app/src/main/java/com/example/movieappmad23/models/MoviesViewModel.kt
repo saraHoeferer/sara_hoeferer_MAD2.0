@@ -16,7 +16,7 @@ class MoviesViewModel: ViewModel() {
             movie.isFavorite = !movie.isFavorite
         }
     }
-    var cnt = 5000000000
+    private var cnt = 1
 
     fun isNotEmpty(input: String): Boolean{
         return input.isEmpty()
@@ -38,7 +38,7 @@ class MoviesViewModel: ViewModel() {
 
     fun addMovie(title: String, year:String, genres: List<ListItemSelectable>, director: String, actors: String, plot:String, rating: String){
         val fullId = "tt$cnt"
-        cnt--
+        cnt++
 
         val selectedGenres = mutableListOf<Genre>()
         for (genre in genres){
