@@ -18,14 +18,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.movieappmad23.R
-import com.example.movieappmad23.viewmodels.MoviesViewModel
+import com.example.movieappmad23.viewmodels.AddMovieViewModel
 import com.example.movieappmad23.widgets.SimpleTextField
 import com.example.movieappmad23.widgets.SimpleTopAppBar
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddMovieScreen(
     navController: NavController,
-    moviesViewModel: MoviesViewModel
+    moviesViewModel: AddMovieViewModel,
 ){
     val scaffoldState = rememberScaffoldState()
 
@@ -40,7 +41,7 @@ fun AddMovieScreen(
         MainContent(
             Modifier.padding(padding),
             moviesViewModel = moviesViewModel,
-            navController = navController
+            navController = navController,
         )
     }
 }
@@ -48,8 +49,8 @@ fun AddMovieScreen(
 @Composable
 fun MainContent(
     modifier: Modifier = Modifier,
-    moviesViewModel: MoviesViewModel,
-    navController: NavController
+    moviesViewModel: AddMovieViewModel,
+    navController: NavController,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -64,7 +65,7 @@ fun MainContent(
             movieUiState = moviesViewModel.movieUiState,
             onMovieValueChange = { newUiState, event -> moviesViewModel.updateUIState(newUiState, event)},
             onSaveClick = {
-                moviesViewModel.saveMovie()
+                coroutineScope.launch { moviesViewModel.saveMovie() }
                 navController.navigate(Screen.MainScreen.route)
             }
         )

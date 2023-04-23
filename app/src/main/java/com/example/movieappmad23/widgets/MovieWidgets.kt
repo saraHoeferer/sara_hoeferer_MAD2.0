@@ -10,10 +10,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +40,9 @@ fun MovieRow(
     movie: Movie = getMovies()[0],
     modifier: Modifier = Modifier,
     onMovieRowClick: (String) -> Unit = {},
-    onFavClick: (Movie) -> Unit = {}
+    onFavClick: (Movie) -> Unit = {},
+    onDeleteClick: (Movie) -> Unit = {}
+
 ) {
     Card(modifier = modifier
         .clickable {
@@ -66,6 +65,7 @@ fun MovieRow(
                     Image(painter = painterResource(id = R.drawable.no_image_placeholder), contentDescription = "Prev Image")
                 }
                 FavoriteIcon(movie, onFavClick)
+                DeleteIcon(movie = movie, onDeleteClick = onDeleteClick)
             }
 
             MovieDetails(modifier = Modifier.padding(12.dp), movie = movie)
@@ -108,6 +108,24 @@ fun FavoriteIcon(movie: Movie, onFavClick: (Movie) -> Unit) {
             contentDescription = "Add to favorites",
             modifier = Modifier.clickable {
                 onFavClick(movie)
+            }
+        )
+    }
+}
+
+@Composable
+fun DeleteIcon(movie: Movie, onDeleteClick: (Movie) -> Unit) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(10.dp),
+        contentAlignment = Alignment.TopStart
+    ){
+        Icon(
+            tint = MaterialTheme.colors.secondary,
+            imageVector = Icons.Default.Clear,
+            contentDescription = "DeleteMovie",
+            modifier = Modifier.clickable {
+                onDeleteClick(movie)
             }
         )
     }

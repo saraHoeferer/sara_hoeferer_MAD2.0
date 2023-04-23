@@ -3,9 +3,14 @@ package com.example.movieappmad23.models
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverter
 import java.util.*
 
+@Entity
 class Movie(
+    @PrimaryKey()
     val id: String = UUID.randomUUID().toString(),
     val title: String = "",
     val year: String = "",
@@ -13,12 +18,10 @@ class Movie(
     val director: String = "",
     val actors: String = "",
     val plot: String = "No plot available",
-    val images: List<String> = listOf(),
+    val images: List<String> = listOf("https://st4.depositphotos.com/14953852/24787/v/600/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg"),
     val rating: Double = 0.0,
-    initialIsFavorite: Boolean = false
-) {
-    var isFavorite by mutableStateOf(initialIsFavorite)
-}
+    var isFavorite: Boolean  = false
+)
 
 fun getMovies(): List<Movie> {
     return listOf(
